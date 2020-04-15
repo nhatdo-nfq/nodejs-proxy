@@ -1,13 +1,17 @@
+let connection = require('./connection');
 let cache = require('./cache')
 let helper = require('./helper');
-let http = require('http')
+let d = require('./debug');
 
 module.exports = {
     requestHandler: async function (request, response) {
+        d(request.method + ' ' + request.url);
+
         if (request.method !== 'GET') {
             // POST, PUT, DELETE....
+            this.forwardRequest(request, response);
+            return;
         }
-        request.pause();
 
         let serverRequest = helper.makeRequestOptions(request);
 
@@ -31,9 +35,18 @@ module.exports = {
     },
     processRequest: async function (request) {
         return new Promise((resolve) => {
-            http.get(request, res => {
+            connection(request).get(request, res => {
                 resolve(res);
             })
         })
+    },
+    forwardRequest: async function (request, response) {
+        request.pause();
+        let serverRequest = helper.makeRequestOptions(request);
+        let connector = connection(serverRequest).request(serverRequest, function (serverResponse) {
+            helper.parseResponse(request, response, serverResponse);
+        })
+        request.pipe(connector, {end:true});
+        request.resume();
     },
 }

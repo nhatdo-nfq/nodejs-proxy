@@ -1,4 +1,5 @@
 const config = require('./config');
+const d = require('./debug');
 
 module.exports = {
     makeRequestOptions: function (request) {
@@ -13,12 +14,11 @@ module.exports = {
                 svHost = host + ':' + config.SV_PORT;
             }
         }
-
         var options = {
             host: svHost,
             port: config.SV_PORT,
             path: request.url,
-            method: 'GET',
+            method: request.method,
             headers: request.headers
         };
         options.headers['host'] = options.host;
@@ -43,7 +43,7 @@ module.exports = {
             case 302:
             case 303:
                 serverResponse.statusCode = 303;
-                serverResponse.headers['location'] = request.headers.host + '/' + serverResponse.headers['location'];
+                // d(serverResponse.headers['location']);
                 response.writeHead(serverResponse.statusCode, serverResponse.headers);
                 serverResponse.pipe(response, {end:true});
                 serverResponse.resume();
