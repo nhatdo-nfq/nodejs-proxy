@@ -17,3 +17,7 @@ server.listen(port, (err) => {
     }
     console.log(`server is listening http on ${port}`)
 })
+
+process.on('uncaughtException', function(err) {
+    console.log('Caught exception: ' + err);
+});

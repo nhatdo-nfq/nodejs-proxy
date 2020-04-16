@@ -7,8 +7,8 @@ module.exports = {
     requestHandler: async function (request, response) {
         d(request.method + ' ' + request.url);
 
-        if (request.method !== 'GET') {
-            // POST, PUT, DELETE....
+        if (!helper.shouldCacheRequest(request)) {
+            // POST, PUT, DELETE, Referer, js, css, image...
             this.forwardRequest(request, response);
             return;
         }

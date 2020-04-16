@@ -1,5 +1,6 @@
 const md5 = require('md5');
 const fs = require('fs');
+const helper = require('./helper');
 
 module.exports = {
     fetch: async function (request) {
@@ -10,28 +11,17 @@ module.exports = {
         return null;
     },
     set: async function (request, response) {
-        if (response.statusCode != 200) {
-            // only cache page with status code 200
+        if (!helper.shouldCacheResponse(response)) {
             return;
         }
         let name = this.getCachedFileFromRequest(request);
-        let content = await this.getStaticContent(request, response);
-        fs.writeFileSync(name, content);
+        let content = await this.getStaticContent(response);
+        if (content != undefined && content != null && content != '') {
+            fs.writeFileSync(name, content);
+        }
     },
-    getContentFromResponse: function(request, response) {
-        var body = '';
-        return new Promise((resolve) => {
-            response.on('data', function (chunk) {
-                body += chunk;
-            })
-
-            response.on('end', function () {
-                resolve(body);
-            });
-        });
-    },
-    getStaticContent: async function(request, response) {
-        let body = await this.getContentFromResponse(request, response);
+    getStaticContent: async function(response) {
+        let body = await helper.getContentFromResponse(response);
         return body;
     },
     getCachedFileFromRequest: function (request) {
