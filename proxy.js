@@ -15,16 +15,18 @@ module.exports = {
 
         let serverRequest = helper.makeRequestOptions(request);
 
-        let cachedResponse =  await cache.fetch(serverRequest);
+        let cachedHtml =  await cache.fetch(serverRequest);
 
-        if (cachedResponse) {
-            helper.parseResponse(request, response, cachedResponse)
+        if (cachedHtml) {
+            d('response with cached');
+            response.end(cachedHtml);
             let needToRefresh = await this.needToRefresh(serverRequest);
             if (needToRefresh) {
                 let res = await this.processRequest(serverRequest);
-                cache.refresh(serverRequest, res);
+                cache.set(serverRequest, res);
             }
         } else {
+            d('response directly');
             let res = await this.processRequest(serverRequest)
             helper.parseResponse(request, response, res);
             cache.set(serverRequest, res);

@@ -5,7 +5,7 @@ module.exports = {
     makeRequestOptions: function (request) {
         let host = request.headers.host;
         let svHost;
-        if (config.SV_PORT == 80) {
+        if (config.SV_PORT == 80 || config.SV_PORT == 443) {
             svHost = host.replace(':' + config.PORT, '');
         } else {
             if (host.indexOf(':' + config.PORT) >= 0) {
@@ -15,13 +15,14 @@ module.exports = {
             }
         }
         var options = {
-            host: svHost,
+            hostname: svHost,
             port: config.SV_PORT,
             path: request.url,
             method: request.method,
             headers: request.headers
         };
-        options.headers['host'] = options.host;
+        options.headers['host'] = options.hostname;
+        options.headers['accept-encoding'] = 'identity';
         return options;
     },
     parseResponse: function (request, response, serverResponse) {
