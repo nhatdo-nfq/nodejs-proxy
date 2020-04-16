@@ -37,7 +37,7 @@ module.exports = {
     },
     processRequest: async function (request) {
         return new Promise((resolve) => {
-            connection(request).get(request, res => {
+            connection().get(request, res => {
                 resolve(res);
             })
         })
@@ -45,7 +45,7 @@ module.exports = {
     forwardRequest: async function (request, response) {
         request.pause();
         let serverRequest = helper.makeRequestOptions(request);
-        let connector = connection(serverRequest).request(serverRequest, function (serverResponse) {
+        let connector = connection().request(serverRequest, function (serverResponse) {
             helper.parseResponse(request, response, serverResponse);
         })
         request.pipe(connector, {end:true});
